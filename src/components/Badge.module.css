@@ -1,0 +1,29 @@
+.badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+.red {
+  background: rgba(248, 81, 73, 0.15);
+  color: var(--red);
+}
+
+.yellow {
+  background: rgba(210, 153, 34, 0.15);
+  color: var(--yellow);
+}
+
+.green {
+  background: rgba(63, 185, 80, 0.15);
+  color: var(--green);
+}
+
+.default {
+  background: var(--bg-hover);
+  color: var(--text-secondary);
+}
