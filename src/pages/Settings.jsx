@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
-import { DollarSign, Download, RefreshCw, Trash2, TrendingUp, Upload } from 'lucide-react'
+import { DollarSign, Download, Moon, RefreshCw, Sun, Trash2, TrendingUp, Upload } from 'lucide-react'
 import { usePortfolio } from '../hooks/usePortfolio'
+import { usePreferences } from '../hooks/usePreferences'
 import { quoteAgeLabel } from '../providers/marketData'
 import { calcPortfolioTotals, fmtTHB, fmtUSD } from '../utils/calculations'
 import Card from '../components/Card'
@@ -10,12 +11,15 @@ function statusLabel(status) {
   return status ? status.charAt(0).toUpperCase() + status.slice(1) : 'Stale'
 }
 
-const SETTINGS_SECTIONS = [
-  { id: 'wallet', label: 'Wallet', detail: 'Cash flows' },
-  { id: 'market', label: 'Market Data', detail: 'Prices and FX' },
-  { id: 'backup', label: 'Backup', detail: 'Export and import' },
-  { id: 'advanced', label: 'Advanced', detail: 'Reset and app info' },
-]
+function getSettingsSections(t) {
+  return [
+    { id: 'wallet', label: t.settings.wallet, detail: t.settings.walletDetail },
+    { id: 'market', label: t.settings.market, detail: t.settings.marketDetail },
+    { id: 'backup', label: t.settings.backup, detail: t.settings.backupDetail },
+    { id: 'preferences', label: t.settings.preferences, detail: t.settings.preferencesDetail },
+    { id: 'advanced', label: t.settings.advanced, detail: t.settings.advancedDetail },
+  ]
+}
 
 export default function Settings() {
   const {
@@ -58,6 +62,8 @@ export default function Settings() {
   const [backupError, setBackupError] = useState('')
   const [activeSection, setActiveSection] = useState('wallet')
   const importInputRef = useRef(null)
+  const { theme, toggleTheme, lang, toggleLanguage, t } = usePreferences()
+  const SETTINGS_SECTIONS = getSettingsSections(t)
 
   function handlePriceChange(ticker, val) {
     setPrices(p => ({ ...p, [ticker]: val }))
@@ -408,6 +414,33 @@ export default function Settings() {
           <button className={styles.saveBtn} onClick={saveFxRate}>Save FX</button>
         </div>
         {savedFx && <p className={styles.successMsg}>FX rate updated successfully!</p>}
+        </Card>
+      )}
+
+      {activeSection === 'preferences' && (
+        <Card>
+          <h2 className={styles.sectionTitle}><Sun size={16} /> {t.settings.preferences}</h2>
+          <div className={styles.prefGrid}>
+            <div className={styles.prefRow}>
+              <div>
+                <p className={styles.prefLabel}>{t.settings.theme}</p>
+                <p className={styles.prefSub}>{theme === 'dark' ? t.settings.dark : t.settings.light}</p>
+              </div>
+              <button className={styles.toggleBtn} onClick={toggleTheme}>
+                {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+                {theme === 'dark' ? t.settings.light : t.settings.dark}
+              </button>
+            </div>
+            <div className={styles.prefRow}>
+              <div>
+                <p className={styles.prefLabel}>{t.settings.language}</p>
+                <p className={styles.prefSub}>{lang === 'en' ? 'English' : 'ภาษาไทย'}</p>
+              </div>
+              <button className={styles.toggleBtn} onClick={toggleLanguage}>
+                {lang === 'en' ? 'ภาษาไทย' : 'English'}
+              </button>
+            </div>
+          </div>
         </Card>
       )}
 

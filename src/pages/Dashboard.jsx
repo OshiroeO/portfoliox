@@ -5,7 +5,8 @@ import {
 import { Link } from 'react-router-dom'
 import { usePortfolio } from '../hooks/usePortfolio'
 import { calcPortfolioTotals, fmtUSD, fmtTHB, fmtPct, plClass } from '../utils/calculations'
-import { performanceHistory } from '../data/mockData'
+import { useEffect, useState } from 'react'
+import { supabase } from '../lib/supabase'
 import StatCard from '../components/StatCard'
 import Card from '../components/Card'
 import HoldingsTable from '../components/HoldingsTable'
@@ -36,6 +37,21 @@ const PerfTooltip = ({ active, payload, label }) => {
 
 export default function Dashboard() {
   const { holdings, cash, fxRate, fxRateValue } = usePortfolio()
+  const [snapshots, setSnapshots] = useState([])
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) return
+      supabase
+        .from('portfolio_snapshots')
+        .select('date, value_thb, cost_thb, pl_thb')
+        .eq('user_id', user.id)
+        .order('date', { ascending: true })
+        .then(({ data }) => {
+          if (data?.length) setSnapshots(data.map(s => ({ date: s.date, value: s.value_thb, cost: s.cost_thb, pl: s.pl_thb })))
+        })
+    })
+  }, [])
   const { holdings: enriched, totalMarketValue, totalCost, totalPL, totalReturn,
     totalMarketValueTHB, totalCostTHB, totalPLTHB } = calcPortfolioTotals(holdings, fxRateValue)
 
@@ -184,9 +200,9 @@ export default function Dashboard() {
         {/* Performance Line — THB */}
         <Card className={styles.perfCard}>
           <h2 className={styles.cardTitle}>Portfolio Performance (THB)</h2>
-          <p className={styles.chartNote}>Historical snapshots · not computed from live transactions</p>
+          <p className={styles.chartNote}>Daily snapshots · saved automatically after each price refresh</p>
           <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={performanceHistory} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
+            <AreaChart data={snapshots} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="perfGradient" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%"  stopColor="var(--accent)" stopOpacity={0.35} />

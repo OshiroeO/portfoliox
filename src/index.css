@@ -43,6 +43,21 @@
   --sidebar-width: 220px;
 }
 
+[data-theme="light"] {
+  --bg-primary:    #f0f3f9;
+  --bg-secondary:  #ffffff;
+  --bg-card:       #ffffff;
+  --bg-hover:      #e8edf5;
+  --border:        #d4dbe8;
+  --border-subtle: #e4e9f2;
+  --text-primary:  #0d1117;
+  --text-secondary:#4a5568;
+  --text-muted:    #718096;
+  --accent-glow:   rgba(79, 142, 247, 0.10);
+  --green-dim:     #e6f9f0;
+  --red-dim:       #fdecea;
+}
+
 * {
   margin: 0;
   padding: 0;

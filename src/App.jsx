@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Layout from './components/Layout'
 import AuthGuard from './components/AuthGuard'
+import { PreferencesProvider } from './hooks/usePreferences'
 import styles from './App.module.css'
 
 const Login = lazy(() => import('./pages/Login'))
@@ -23,6 +24,7 @@ function PageLoader() {
 
 function App() {
   return (
+    <PreferencesProvider>
     <BrowserRouter>
       <Suspense fallback={<PageLoader />}>
         <Routes>
@@ -42,6 +44,7 @@ function App() {
         </Routes>
       </Suspense>
     </BrowserRouter>
+    </PreferencesProvider>
   )
 }
 

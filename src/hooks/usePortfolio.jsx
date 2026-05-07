@@ -10,6 +10,7 @@ import {
 import { initialHoldings } from '../data/mockData.js'
 import { loadPortfolioState, migratePortfolioData, normalizeCashFlow, normalizeTransaction, normalizeWatchItem, serializePortfolioState, STORAGE_KEY } from '../utils/storageMigration'
 import { applyTransactionSet, cashFromTransactions } from '../utils/portfolioOperations'
+import { calcPortfolioTotals } from '../utils/calculations'
 
 const PortfolioContext = createContext(null)
 
@@ -167,6 +168,19 @@ export function PortfolioProvider({ children, user }) {
     }
   }
 
+  async function saveSnapshot(currentHoldings, fxRateValue) {
+    if (!userRef.current?.id || !currentHoldings?.length) return
+    const today = new Date().toISOString().split('T')[0]
+    const totals = calcPortfolioTotals(currentHoldings, fxRateValue)
+    await supabase.from('portfolio_snapshots').upsert({
+      user_id: userRef.current.id,
+      date: today,
+      value_thb: Math.round(totals.totalMarketValueTHB),
+      cost_thb: Math.round(totals.totalCostTHB),
+      pl_thb: Math.round(totals.totalPLTHB),
+    }, { onConflict: 'user_id,date' })
+  }
+
   async function refreshMarketData() {
     const quotes = await refreshQuotes()
     const fx = await refreshFxRate()
@@ -179,6 +193,10 @@ export function PortfolioProvider({ children, user }) {
       }))
       return null
     }
+    setState(prev => {
+      saveSnapshot(prev.holdings, fx.rate)
+      return prev
+    })
     return { quotes, fx }
   }
 
